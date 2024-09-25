@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
 import * as handlebars from 'handlebars';
 
-import {Build} from '@docker/actions-toolkit/lib/buildx/build';
-import {Context} from '@docker/actions-toolkit/lib/context';
-import {GitHub} from '@docker/actions-toolkit/lib/github';
-import {Toolkit} from '@docker/actions-toolkit/lib/toolkit';
-import {Util} from '@docker/actions-toolkit/lib/util';
+import { Build } from '@docker/actions-toolkit/lib/buildx/build';
+import { Context } from '@docker/actions-toolkit/lib/context';
+import { GitHub } from '@docker/actions-toolkit/lib/github';
+import { Toolkit } from '@docker/actions-toolkit/lib/toolkit';
+import { Util } from '@docker/actions-toolkit/lib/util';
 
 export interface Inputs {
   'add-hosts': string[];
@@ -40,42 +40,51 @@ export interface Inputs {
   target: string;
   ulimit: string[];
   'github-token': string;
+  'build-args-from-json': string;
 }
 
 export async function getInputs(): Promise<Inputs> {
   return {
+
     'add-hosts': Util.getInputList('add-hosts'),
     allow: Util.getInputList('allow'),
-    annotations: Util.getInputList('annotations', {ignoreComma: true}),
-    attests: Util.getInputList('attests', {ignoreComma: true}),
-    'build-args': Util.getInputList('build-args', {ignoreComma: true}),
-    'build-contexts': Util.getInputList('build-contexts', {ignoreComma: true}),
-    builder: core.getInput('builder'),
-    'cache-from': Util.getInputList('cache-from', {ignoreComma: true}),
-    'cache-to': Util.getInputList('cache-to', {ignoreComma: true}),
-    'cgroup-parent': core.getInput('cgroup-parent'),
-    context: core.getInput('context') || Context.gitContext(),
-    file: core.getInput('file'),
-    labels: Util.getInputList('labels', {ignoreComma: true}),
-    load: core.getBooleanInput('load'),
-    network: core.getInput('network'),
-    'no-cache': core.getBooleanInput('no-cache'),
+    annotations: Util.getInputList('annotations', { ignoreComma: true }),
+    attests: Util.getInputList('attests', { ignoreComma: true }),
+    'build-args': Util.getInputList('build-args', { ignoreComma: true }),
+    'build-contexts': Util.getInputList('build-contexts', { ignoreComma: true }),
+    'cache-from': Util.getInputList('cache-from', { ignoreComma: true }),
+    'cache-to': Util.getInputList('cache-to', { ignoreComma: true }),
+    labels: Util.getInputList('labels', { ignoreComma: true }),
     'no-cache-filters': Util.getInputList('no-cache-filters'),
-    outputs: Util.getInputList('outputs', {ignoreComma: true, quote: false}),
+    outputs: Util.getInputList('outputs', { ignoreComma: true, quote: false }),
     platforms: Util.getInputList('platforms'),
-    provenance: Build.getProvenanceInput('provenance'),
-    pull: core.getBooleanInput('pull'),
-    push: core.getBooleanInput('push'),
-    sbom: core.getInput('sbom'),
-    secrets: Util.getInputList('secrets', {ignoreComma: true}),
+    ulimit: Util.getInputList('ulimit', { ignoreComma: true }),
+    secrets: Util.getInputList('secrets', { ignoreComma: true }),
     'secret-envs': Util.getInputList('secret-envs'),
-    'secret-files': Util.getInputList('secret-files', {ignoreComma: true}),
-    'shm-size': core.getInput('shm-size'),
+    'secret-files': Util.getInputList('secret-files', { ignoreComma: true }),
     ssh: Util.getInputList('ssh'),
     tags: Util.getInputList('tags'),
+
+    'build-args-from-json': core.getInput('build-args-from-json'),
+    'cgroup-parent': core.getInput('cgroup-parent'),
+    'shm-size': core.getInput('shm-size'),
     target: core.getInput('target'),
-    ulimit: Util.getInputList('ulimit', {ignoreComma: true}),
-    'github-token': core.getInput('github-token')
+    'github-token': core.getInput('github-token'),
+    builder: core.getInput('builder'),
+    context: core.getInput('context') || Context.gitContext(),
+    file: core.getInput('file'),
+    network: core.getInput('network'),
+    sbom: core.getInput('sbom'),
+
+
+    load: core.getBooleanInput('load'),
+    'no-cache': core.getBooleanInput('no-cache'),
+    pull: core.getBooleanInput('pull'),
+    push: core.getBooleanInput('push'),
+
+    provenance: Build.getProvenanceInput('provenance')
+
+
   };
 }
 
@@ -214,6 +223,7 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
   if (inputs.builder) {
     args.push('--builder', inputs.builder);
   }
+
   if (inputs.load) {
     args.push('--load');
   }
@@ -232,6 +242,19 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
   if (inputs.push) {
     args.push('--push');
   }
+
+  if (inputs['build-args-from-json']) {
+    let applicationVariablesAsJson = JSON.parse(inputs['build-args-from-json'])
+    let applicationVariables = {}
+    core.debug('Adding application secret inputs')
+    for (const key in applicationVariablesAsJson) {
+      args.push('--build-arg')
+      applicationVariables[key] = applicationVariablesAsJson[key];
+      args.push(`${key}=${applicationVariables[key]}`)
+    }
+
+  }
+
   return args;
 }
 
