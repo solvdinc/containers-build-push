@@ -249,10 +249,10 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
     core.debug('Adding application secret inputs')
     for (const key in applicationVariablesAsJson) {
       args.push('--build-arg')
-      applicationVariables[key] = applicationVariablesAsJson[key];
-      args.push(`${key}=${applicationVariables[key]}`)
+      let dryKey = key.startsWith("ENV_") ? key.replace("ENV_", "") : key;
+      applicationVariables[dryKey] = applicationVariablesAsJson[key];
+      args.push(`${dryKey}=${applicationVariables[dryKey]}`)
     }
-
   }
 
   return args;
