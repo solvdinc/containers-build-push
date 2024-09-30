@@ -25,6 +25,9 @@ inputs:
   build-args-from-json:
     description: "List of build-time variables in JSON format"
     required: false
+  build-secret-args-from-json:
+    description: "List of build-time secret variables in JSON format"
+    required: false
   build-contexts:
     description: "List of additional build contexts (e.g., name=path)"
     required: false

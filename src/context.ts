@@ -41,6 +41,7 @@ export interface Inputs {
   ulimit: string[];
   'github-token': string;
   'build-args-from-json': string;
+  'build-secret-args-from-json': string;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -66,6 +67,7 @@ export async function getInputs(): Promise<Inputs> {
     tags: Util.getInputList('tags'),
 
     'build-args-from-json': core.getInput('build-args-from-json'),
+    'build-secret-args-from-json': core.getInput('build-secret-args-from-json'),
     'cgroup-parent': core.getInput('cgroup-parent'),
     'shm-size': core.getInput('shm-size'),
     target: core.getInput('target'),
@@ -246,12 +248,24 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
   if (inputs['build-args-from-json']) {
     let applicationVariablesAsJson = JSON.parse(inputs['build-args-from-json'])
     let applicationVariables = {}
-    core.debug('Adding application secret inputs')
+    core.debug('Adding application variable inputs')
     for (const key in applicationVariablesAsJson) {
       args.push('--build-arg')
       let dryKey = key.startsWith("ENV_") ? key.replace("ENV_", "") : key;
       applicationVariables[dryKey] = applicationVariablesAsJson[key];
       args.push(`${dryKey}=${applicationVariables[dryKey]}`)
+    }
+  }
+
+  if (inputs['build-secret-args-from-json']) {
+    let applicationSecretsAsJson = JSON.parse(inputs['build-secret-args-from-json'])
+    let applicationSecrets = {}
+    core.debug('Adding application secret inputs')
+    for (const key in applicationSecretsAsJson) {
+      args.push('--build-arg')
+      let dryKey = key.startsWith("ENV_") ? key.replace("ENV_", "") : key;
+      applicationSecrets[dryKey] = Buffer.from(applicationSecretsAsJson[key]).toString('base64');
+      args.push(`${dryKey}=${applicationSecrets[dryKey]}`)
     }
   }
 
