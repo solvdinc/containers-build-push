@@ -253,7 +253,7 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
       if (
         key.startsWith("BENV_")
         || key.startsWith("APP_")
-        || key.startsWith("DOCKER_")
+        || key.startsWith("DOCKER_IMAGE_")
       ) {
         args.push('--build-arg')
         let dryKey = key.startsWith("BENV_") ? key.replace("BENV_", "") : key;
@@ -271,7 +271,7 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
       if (
         key.startsWith("BENV_")
         || key.startsWith("APP_")
-        || key.startsWith("DOCKER_")
+        || key.startsWith("DOCKER_IMAGE_")
       ) {
         args.push('--build-arg')
         let dryKey = key.startsWith("BENV_") ? key.replace("BENV_", "") : key;
