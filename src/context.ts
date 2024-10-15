@@ -250,7 +250,11 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
     let applicationVariables = {}
     core.debug('Adding application variable inputs')
     for (const key in applicationVariablesAsJson) {
-      if (key.startsWith("BENV_") || key.startsWith("APP_") || key.startsWith("DOCKER_")) {
+      if (
+        key.startsWith("BENV_")
+        || key.startsWith("APP_")
+        || key.startsWith("DOCKER_")
+      ) {
         args.push('--build-arg')
         let dryKey = key.startsWith("BENV_") ? key.replace("BENV_", "") : key;
         applicationVariables[dryKey] = applicationVariablesAsJson[key];
@@ -264,7 +268,11 @@ async function getCommonArgs(inputs: Inputs, toolkit: Toolkit): Promise<Array<st
     let applicationSecrets = {}
     core.debug('Adding application secret inputs')
     for (const key in applicationSecretsAsJson) {
-      if (key.startsWith("BENV_") || key.startsWith("APP_") || key.startsWith("DOCKER_")) {
+      if (
+        key.startsWith("BENV_")
+        || key.startsWith("APP_")
+        || key.startsWith("DOCKER_")
+      ) {
         args.push('--build-arg')
         let dryKey = key.startsWith("BENV_") ? key.replace("BENV_", "") : key;
         applicationSecrets[dryKey] = Buffer.from(applicationSecretsAsJson[key]).toString('base64');
